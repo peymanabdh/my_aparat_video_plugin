@@ -60,8 +60,14 @@ services:
     depends_on:
       wordpress:
         condition: service_healthy
-    command: ["sh", "/wp-init.sh"]
-    restart: "no"
+    command: ["sh", "-c", "/wp-init.sh && touch /tmp/setup-done && tail -f /dev/null"]
+    healthcheck:
+      test: ["CMD-SHELL", "test -f /tmp/setup-done"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+    restart: on-failure
 
 volumes:
   db_data:
